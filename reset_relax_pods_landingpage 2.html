@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESET — Private Ruhe in München</title>
+<style>
+:root{
+  --bg:#f5f2ed; --card:#fffdf9; --text:#20201e; --muted:#716f69;
+  --accent:#20201e; --line:#ded9d0; --soft:#ece8e1; --ok:#dfe9df;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:760px;margin:auto;padding:22px 18px 60px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:34px}
+.logo{font-weight:800;letter-spacing:.16em;font-size:14px}
+.tag{font-size:12px;color:var(--muted)}
+.hero{padding:22px 0 28px}
+.kicker{text-transform:uppercase;letter-spacing:.13em;font-size:12px;color:var(--muted);font-weight:700}
+h1{font-size:clamp(38px,9vw,68px);line-height:.98;margin:14px 0 18px;letter-spacing:-.045em}
+.hero p{font-size:18px;line-height:1.55;color:#55534e;max-width:620px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,.04)}
+.start{text-align:center;padding:34px 24px}
+button{border:0;border-radius:14px;background:var(--accent);color:white;padding:15px 20px;font-size:16px;font-weight:750;cursor:pointer;width:100%;margin-top:8px}
+.small{font-size:12px;color:var(--muted);line-height:1.45;margin-top:12px}
+.progress{height:6px;background:var(--soft);border-radius:99px;overflow:hidden;margin-bottom:22px}
+.progress i{display:block;height:100%;background:var(--accent);width:12.5%;transition:.25s}
+.q{font-size:22px;line-height:1.2;margin:0 0 18px}
+.options{display:grid;gap:10px}
+.option{background:#fff;border:1px solid var(--line);padding:15px 16px;border-radius:14px;text-align:left;color:var(--text);font-size:15px;font-weight:600;cursor:pointer}
+.option:hover{background:var(--soft)}
+.option.selected{outline:2px solid var(--accent);background:var(--soft)}
+.multi-note{font-size:12px;color:var(--muted);margin-top:-8px;margin-bottom:14px}
+.nav{display:flex;gap:10px;margin-top:20px}
+.nav button{margin:0}
+.nav .back{background:var(--soft);color:var(--text)}
+.hidden{display:none}
+.result{text-align:center}
+.pricebox{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.price{border:1px solid var(--line);border-radius:18px;padding:18px;background:#fff}
+.price strong{display:block;font-size:22px}
+.email{width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;font-size:16px;margin-top:8px}
+@media(max-width:520px){.pricebox{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="logo">RESET</div><div class="tag">München · Konzepttest</div></header>
+
+<section class="hero">
+<div class="kicker">60 Sekunden · anonym möglich</div>
+<h1>Eine Stunde.<br>Nur für dich.</h1>
+<p>Wir überlegen, in München kleine private Relax Pods zu eröffnen: ein sauberer, gemütlicher Raum mit Daybed, angenehmem Licht, Ruhe und Steckdose. Du buchst ihn für kurze Zeit und hast einfach deine Ruhe.</p>
+</section>
+
+<div id="start" class="card start">
+<h2>Würdest du so einen Ort nutzen?</h2>
+<p>Keine Werbung, kein Newsletter-Zwang. Wir wollen herausfinden, ob das Konzept in München wirklich gebraucht wird.</p>
+<button onclick="startSurvey()">Umfrage starten →</button>
+<div class="small">Dauert etwa 60 Sekunden.</div>
+</div>
+
+<div id="survey" class="card hidden">
+<div class="progress"><i id="bar"></i></div>
+<div id="question"></div>
+<div id="nav" class="nav"></div>
+</div>
+
+<div id="result" class="card result hidden">
+<div class="kicker">Danke für deine Antwort</div>
+<h2>Das hilft uns wirklich.</h2>
+<p>Wenn du informiert werden möchtest, sobald der erste RESET-Pod in München startet, kannst du dich hier unverbindlich eintragen.</p>
+<p><strong>Und wenn du in der passenden Situation wärst – z. B. 45 Minuten vor deinem Zug – würdest du ihn sofort buchen?</strong></p>
+<input id="email" class="email" type="email" placeholder="deine E-Mail (optional)">
+<button onclick="finish()">Interesse speichern</button>
+<div class="small">Nur für diesen Konzepttest. Keine Verpflichtung und kein Kauf.</div>
+<p id="thanks" class="hidden" style="font-weight:700;margin-top:20px">Gespeichert. Danke! 🙌</p>
+</div>
+</div>
+
+<script>
+const questions = [
+ {q:"Wie oft bist du in München unterwegs?", opts:["Fast täglich","Mehrmals pro Woche","Mehrmals im Monat","Seltener"]},
+ {q:"Hast du in München schon einmal einen ruhigen Ort zum Ausruhen vermisst?", opts:["Ja, häufig","Ja, gelegentlich","Einmal","Nein"]},
+ {q:"Wann würdest du einen Relax Pod am ehesten nutzen?", multi:true, opts:["Auf Zug/Fernbus warten","Zwischen Terminen","Vor/nach einem Flug","Powernap","Einfach abschalten","Nach Shopping / Stadtbesuch","Kurz arbeiten"]},
+ {q:"Wo wäre so ein Angebot für dich am interessantesten?", opts:["München Hbf","ZOB","Flughafen","Innenstadt","Einkaufszentrum","Businessviertel","Egal, Hauptsache zentral"]},
+ {q:"Wie lange würdest du ihn wahrscheinlich nutzen?", opts:["15–30 Min.","30–60 Min.","60–90 Min.","90–120 Min.","Mehr als 2 Stunden"]},
+ {q:"30 Minuten kosten 9,90 €. Würdest du ihn dafür tatsächlich buchen?", opts:["Ja, wahrscheinlich","Vielleicht","Nein"]},
+ {q:"60 Minuten kosten 16 €. Würdest du ihn dafür tatsächlich buchen?", opts:["Ja, wahrscheinlich","Vielleicht","Nein"]},
+ {q:"Was würde dich am ehesten davon abhalten?", multi:true, opts:["Zu teuer","Hygiene","Sicherheitsbedenken","Zu klein/eng","Ich brauche so etwas nicht","Ich würde lieber ins Café gehen","Ich würde lieber eine Lounge nutzen"]}
+];
+let step=0, answers=[];
+
+function startSurvey(){document.getElementById("start").classList.add("hidden");document.getElementById("survey").classList.remove("hidden");render();}
+function render(){
+ const x=questions[step];
+ document.getElementById("bar").style.width=((step+1)/questions.length*100)+"%";
+ let h=`<h2 class="q">${step+1}. ${x.q}</h2>`;
+ if(x.multi) h+=`<div class="multi-note">Mehrfachauswahl möglich.</div>`;
+ h+=`<div class="options">`;
+ x.opts.forEach((o,i)=>{
+   const selected=Array.isArray(answers[step]) ? answers[step].includes(o) : answers[step]===o;
+   h+=`<button class="option ${selected?'selected':''}" onclick="choose(${i})">${selected?'✓ ':''}${o}</button>`;
+ });
+ h+=`</div>`;
+ document.getElementById("question").innerHTML=h;
+ let nav="";
+ if(step>0) nav+=`<button class="back" onclick="back()">← Zurück</button>`;
+ if(x.multi) nav+=`<button id="next" onclick="next()">Weiter →</button>`;
+ document.getElementById("nav").innerHTML=nav;
+}
+function choose(i){
+ const x=questions[step], o=x.opts[i];
+ if(x.multi){
+   let a=Array.isArray(answers[step])?[...answers[step]]:[];
+   a.includes(o)?a=a.filter(v=>v!==o):a.push(o);
+   answers[step]=a; render();
+ } else {answers[step]=o; next();}
+}
+function next(){if(step<questions.length-1){step++;render()}else{document.getElementById("survey").classList.add("hidden");document.getElementById("result").classList.remove("hidden");}}
+function back(){if(step>0){step--;render()}}
+async function finish(){
+ const email=document.getElementById("email").value.trim();
+ const data = new FormData();
+ questions.forEach((q,i)=>{
+   const value = Array.isArray(answers[i]) ? answers[i].join(", ") : (answers[i] || "");
+   data.append(`frage_${i+1}`, value);
+ });
+ data.append("email", email);
+ data.append("zeitpunkt", new Date().toISOString());
+ data.append("quelle", "RESET Landingpage");
+
+ try {
+   const response = await fetch("https://formspree.io/f/xjyvvdvd", {
+     method: "POST",
+     body: data,
+     headers: { "Accept": "application/json" }
+   });
+   if(!response.ok) throw new Error("Form submission failed");
+   document.getElementById("thanks").classList.remove("hidden");
+   document.getElementById("email").disabled=true;
+   document.querySelector("#result button").disabled=true;
+ } catch(e) {
+   alert("Leider konnte die Antwort gerade nicht gespeichert werden. Bitte versuche es noch einmal.");
+ }
+}
+</script>
+</body>
+</html>
